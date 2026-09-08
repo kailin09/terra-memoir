@@ -36,7 +36,7 @@ export default function Home() {
   const look = looks[activeLook];
   const wrap = wraps[selectedWrap];
   const wrapVariants = ['kraft', 'white', 'sage', 'wine', 'sage', 'peach'];
-  const flowerVariant = selectedWrap === 0 && selected.some((index) => [6, 9, 11].includes(index)) ? 'sunflower' : null;
+  const flowerVariant = selectedWrap === 0 && selected.includes(5) ? 'tulip' : selectedWrap === 0 && selected.some((index) => [6, 9, 11].includes(index)) ? 'sunflower' : null;
   const imageVariant = flowerVariant ?? wrapVariants[selectedWrap];
   const imageSrc = `/bouquet-preview-${imageVariant}.png`;
   const progress = Math.min(100, 46 + selected.length * 4);
