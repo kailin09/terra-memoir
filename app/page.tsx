@@ -24,6 +24,34 @@ const looks = [
 
 type Screen = 1 | 2 | 3;
 
+type PreviewPlan = {
+  asset: string;
+  variant: string;
+  imageClass: string;
+  focus: string;
+};
+
+function getPreviewPlan(selected: number[], selectedWrap: number): PreviewPlan {
+  const selectedSet = new Set(selected);
+  const wrapAssets = ['kraft', 'white', 'sage', 'wine', 'sage', 'peach'];
+
+  // This is intentionally local and deterministic: every choice changes the
+  // plan without needing an API key or sending the user's selections away.
+  if (selectedSet.has(5)) {
+    return { asset: 'tulip', variant: 'tulip-focus', imageClass: `preview-photo wrap-${wraps[selectedWrap].tone}`, focus: '郁金香主花' };
+  }
+  if (selectedSet.has(6)) {
+    return { asset: 'sunflower', variant: 'sunflower-focus', imageClass: `preview-photo wrap-${wraps[selectedWrap].tone}`, focus: '向日葵主花' };
+  }
+  if (selectedSet.has(2)) {
+    return { asset: wrapAssets[selectedWrap], variant: 'ranunculus-focus', imageClass: `preview-photo wrap-${wraps[selectedWrap].tone}`, focus: '毛茛主花' };
+  }
+  if (selectedSet.has(8)) {
+    return { asset: wrapAssets[selectedWrap], variant: 'hydrangea-focus', imageClass: `preview-photo wrap-${wraps[selectedWrap].tone}`, focus: '绣球主花' };
+  }
+  return { asset: wrapAssets[selectedWrap], variant: 'balanced-mix', imageClass: `preview-photo wrap-${wraps[selectedWrap].tone}`, focus: '均衡混搭' };
+}
+
 export default function Home() {
   const [screen, setScreen] = useState<Screen>(1);
   const [selected, setSelected] = useState([0, 1, 2, 3]);
@@ -35,10 +63,11 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const look = looks[activeLook];
   const wrap = wraps[selectedWrap];
-  const wrapVariants = ['kraft', 'white', 'sage', 'wine', 'sage', 'peach'];
-  const flowerVariant = selectedWrap === 0 && selected.includes(5) ? 'tulip' : selectedWrap === 0 && selected.some((index) => [6, 9, 11].includes(index)) ? 'sunflower' : null;
-  const imageVariant = flowerVariant ?? wrapVariants[selectedWrap];
-  const imageSrc = `/bouquet-preview-${imageVariant}.png`;
+  const previewPlan = getPreviewPlan(selected, selectedWrap);
+  const imageVariant = previewPlan.variant;
+  const imageSrc = `/bouquet-preview-${previewPlan.asset}.png`;
+  const selectedNames = selected.map((index) => flowers[index].name);
+  const previewKey = `${imageSrc}-${selected.join('-')}-${selectedWrap}`;
   const progress = Math.min(100, 46 + selected.length * 4);
 
   const toggleFlower = (index: number) => setSelected((current) => current.includes(index) ? current.filter((item) => item !== index) : [...current, index]);
@@ -56,7 +85,7 @@ export default function Home() {
 
   if (screen === 1) return <main className="app-shell"><Landing onStart={() => setScreen(2)} /><button className="mobile-menu" aria-label="打开菜单"><Menu size={20} /></button></main>;
 
-  return <main className="app-shell"><FlowHeader screen={screen} onHome={() => setScreen(1)} /><div className="page-wrap flow-page">{screen === 2 ? <SelectionScreen selected={selected} selectedWrap={selectedWrap} occasion={occasion} isGenerating={isGenerating} progress={progress} onToggleFlower={toggleFlower} onSelectWrap={setSelectedWrap} onOccasion={setOccasion} onReset={reset} onBack={() => setScreen(1)} onGenerate={generate} /> : <ResultScreen look={look} wrap={wrap} imageSrc={imageSrc} imageVariant={imageVariant} activeLook={activeLook} saved={saved} showTutorial={showTutorial} onLookChange={setActiveLook} onSave={() => setSaved(!saved)} onTutorial={() => setShowTutorial(!showTutorial)} onBack={() => setScreen(2)} />}</div><button className="mobile-menu" aria-label="打开菜单"><Menu size={20} /></button></main>;
+  return <main className="app-shell"><FlowHeader screen={screen} onHome={() => setScreen(1)} /><div className="page-wrap flow-page">{screen === 2 ? <SelectionScreen selected={selected} selectedWrap={selectedWrap} occasion={occasion} isGenerating={isGenerating} progress={progress} onToggleFlower={toggleFlower} onSelectWrap={setSelectedWrap} onOccasion={setOccasion} onReset={reset} onBack={() => setScreen(1)} onGenerate={generate} /> : <ResultScreen look={look} wrap={wrap} selectedNames={selectedNames} imageSrc={imageSrc} imageVariant={imageVariant} imageClass={previewPlan.imageClass} focus={previewPlan.focus} previewKey={previewKey} activeLook={activeLook} saved={saved} showTutorial={showTutorial} onLookChange={setActiveLook} onSave={() => setSaved(!saved)} onTutorial={() => setShowTutorial(!showTutorial)} onBack={() => setScreen(2)} />}</div><button className="mobile-menu" aria-label="打开菜单"><Menu size={20} /></button></main>;
 }
 
 function Landing({ onStart }: { onStart: () => void }) {
@@ -71,6 +100,6 @@ function SelectionScreen({ selected, selectedWrap, occasion, isGenerating, progr
   return <section className="selection-screen"><div className="flow-heading"><div><p className="eyebrow">02 / 选择你的材料</p><h2>先告诉我，你手里有什么。</h2><p>花材和包装纸都可以多选或随时更换。</p></div><div className="progress-card"><span>准备完成度</span><strong>{progress}%</strong><div className="progress"><i style={{ width: `${progress}%` }} /></div><small>{selected.length} 种花材 · 还差一步</small></div></div><div className="selection-grid"><section className="panel selection-panel"><div className="panel-heading"><div><span className="step-no">01</span><h2>我买了这些花</h2></div><button className="reset" onClick={onReset}><RotateCcw size={14} /> 重置</button></div><p className="helper">点选你手边的花材，可以多选。</p><div className="flower-grid">{flowers.map((flower, i) => <button className={`flower-chip ${selected.includes(i) ? 'chosen' : ''}`} key={flower.name} onClick={() => onToggleFlower(i)}><span className={`flower-dot ${flower.tone}`}><span /></span><span className="flower-name"><b>{flower.name}</b><small>{flower.en}</small></span>{selected.includes(i) ? <Check className="check" size={15} /> : <Plus className="plus" size={15} />}</button>)}</div></section><section className="panel selection-panel"><div className="panel-heading"><div><span className="step-no">02</span><h2>我想用这张包装纸</h2></div><span className="choice-count">{wraps.length} 种选择</span></div><p className="helper">选择颜色和材质，生成时会应用到花束上。</p><div className="wrap-grid wrap-grid-large">{wraps.map((item, i) => <button className={`wrap-option ${selectedWrap === i ? 'chosen' : ''}`} key={`${item.name}-${item.material}`} onClick={() => onSelectWrap(i)}><span className={`wrap-swatch ${item.tone}`} /><span><b>{item.name}</b><small>{item.material}</small></span>{selectedWrap === i && <Check size={14} />}</button>)}</div><div className="occasion occasion-large"><label>这束花是送给谁？</label><div className="occasion-select"><select value={occasion} onChange={(event) => onOccasion(event.target.value)} aria-label="选择送花对象"><option>给自己</option><option>给朋友</option><option>给恋人</option><option>给家人</option></select><ChevronDown size={15} /></div></div><div className="selection-summary"><div className={`summary-swatch ${wraps[selectedWrap].tone}`} /><div><small>当前包装选择</small><b>{wraps[selectedWrap].name} · {wraps[selectedWrap].material}</b></div></div></section></div><div className="flow-actions"><button className="back-action" onClick={onBack}><ArrowLeft size={16} /> 返回介绍</button><button className="generate wide-generate" onClick={onGenerate} disabled={isGenerating || selected.length === 0}>{isGenerating ? <><Sparkles size={17} /> 正在生成你的花束…</> : <><WandSparkles size={17} /> 生成我的花束 <ArrowRight size={17} /></>}</button></div></section>;
 }
 
-function ResultScreen({ look, wrap, imageSrc, imageVariant, activeLook, saved, showTutorial, onLookChange, onSave, onTutorial, onBack }: { look: typeof looks[number]; wrap: typeof wraps[number]; imageSrc: string; imageVariant: string; activeLook: number; saved: boolean; showTutorial: boolean; onLookChange: (index: number) => void; onSave: () => void; onTutorial: () => void; onBack: () => void }) {
-  return <section className="result-screen"><div className="result-heading"><div><p className="eyebrow"><Sparkles size={14} /> 03 / 你的花束生成好了</p><h2>这就是你的<br /><em>{look.title}。</em></h2><p>根据你选择的花材和包装，先从这个方向开始试试看。</p></div><button className="back-edit" onClick={onBack}><ArrowLeft size={15} /> 重新选择</button></div><div className="result-grid"><section className="preview panel"><div className="panel-heading"><div><span className="step-no">AI PREVIEW</span><h2>你的花束效果</h2></div><button className={`save-btn ${saved ? 'saved' : ''}`} onClick={onSave}><Heart size={15} fill={saved ? 'currentColor' : 'none'} /> {saved ? '已收藏' : '收藏'}</button></div><div className="look-tabs">{looks.map((item, i) => <button className={activeLook === i ? 'active' : ''} onClick={() => onLookChange(i)} key={item.title}><span className="tab-index">0{i + 1}</span>{item.title}</button>)}</div><div className="hero-image"><img key={imageSrc} src={imageSrc} alt={`${look.title}风格，${wrap.name}${wrap.material}包装的 AI 花束预览`} /><div className="image-label"><span>AI PREVIEW · {imageVariant.toUpperCase()}</span><b>{look.title}</b></div><button className="image-heart" onClick={onSave} aria-label="收藏方案"><Heart size={18} fill={saved ? 'currentColor' : 'none'} /></button></div><div className="look-caption"><div><h3>{look.title}</h3><p>{look.note}</p><div className="wrap-note"><span className={`wrap-dot ${wrap.tone}`} style={{ backgroundColor: wrap.color }} /> 当前包装：{wrap.name} · {wrap.material}</div></div><span className="recommend">{look.tag}</span></div></section><aside className="tutorial panel"><div className="panel-heading"><div><span className="step-no">HOW TO</span><h2>跟着教程包起来</h2></div><BookOpen size={18} className="muted-icon" /></div><p className="helper">3 个小步骤，把这束花还原出来。</p><div className="steps">{look.steps.map((step, i) => <div className="tutorial-step" key={step}><span>{i + 1}</span><p>{step}</p></div>)}</div><button className="tutorial-link" onClick={onTutorial}>{showTutorial ? '收起详细教程' : '查看详细教程'} <ArrowRight size={16} /></button>{showTutorial && <div className="detail-tip"><Leaf size={15} /> 小提醒：花茎交叉点要握紧，包装纸才会自然打开。</div>}<div className="tip-card"><Leaf size={17} /><div><b>花艺小贴士</b><p>包装纸的高度不要超过花头的 ⅔，才能露出轻盈的层次。</p></div></div></aside></div></section>;
+function ResultScreen({ look, wrap, selectedNames, imageSrc, imageVariant, imageClass, focus, previewKey, activeLook, saved, showTutorial, onLookChange, onSave, onTutorial, onBack }: { look: typeof looks[number]; wrap: typeof wraps[number]; selectedNames: string[]; imageSrc: string; imageVariant: string; imageClass: string; focus: string; previewKey: string; activeLook: number; saved: boolean; showTutorial: boolean; onLookChange: (index: number) => void; onSave: () => void; onTutorial: () => void; onBack: () => void }) {
+  return <section className="result-screen"><div className="result-heading"><div><p className="eyebrow"><Sparkles size={14} /> 03 / 你的花束生成好了</p><h2>这就是你的<br /><em>{look.title}。</em></h2><p>这是根据你刚才的花材和包装，自动匹配出的免费本地参考方案。</p></div><button className="back-edit" onClick={onBack}><ArrowLeft size={15} /> 重新选择</button></div><div className="result-grid"><section className="preview panel"><div className="panel-heading"><div><span className="step-no">FREE LOCAL PREVIEW</span><h2>你的花束效果</h2></div><button className={`save-btn ${saved ? 'saved' : ''}`} onClick={onSave}><Heart size={15} fill={saved ? 'currentColor' : 'none'} /> {saved ? '已收藏' : '收藏'}</button></div><div className="look-tabs">{looks.map((item, i) => <button className={activeLook === i ? 'active' : ''} onClick={() => onLookChange(i)} key={item.title}><span className="tab-index">0{i + 1}</span>{item.title}</button>)}</div><div className="hero-image"><img className={imageClass} key={previewKey} src={imageSrc} alt={`${look.title}风格，${selectedNames.join('、')}和${wrap.name}${wrap.material}包装的本地花束预览`} /><div className="image-label"><span>FREE PREVIEW · {imageVariant.toUpperCase()}</span><b>{look.title}</b></div><button className="image-heart" onClick={onSave} aria-label="收藏方案"><Heart size={18} fill={saved ? 'currentColor' : 'none'} /></button></div><div className="look-caption"><div><h3>{look.title}</h3><p>{look.note}</p><div className="wrap-note"><span className={`wrap-dot ${wrap.tone}`} style={{ backgroundColor: wrap.color }} /> 当前包装：{wrap.name} · {wrap.material}</div><div className="material-summary"><span>已选花材</span><div>{selectedNames.map((name) => <b key={name}>{name}</b>)}</div></div><p className="local-note">本地匹配：{focus} · 完全免费，不上传你的选择</p></div><span className="recommend">{look.tag}</span></div></section><aside className="tutorial panel"><div className="panel-heading"><div><span className="step-no">HOW TO</span><h2>跟着教程包起来</h2></div><BookOpen size={18} className="muted-icon" /></div><p className="helper">3 个小步骤，把这束花还原出来。</p><div className="steps">{look.steps.map((step, i) => <div className="tutorial-step" key={step}><span>{i + 1}</span><p>{step}</p></div>)}</div><button className="tutorial-link" onClick={onTutorial}>{showTutorial ? '收起详细教程' : '查看详细教程'} <ArrowRight size={16} /></button>{showTutorial && <div className="detail-tip"><Leaf size={15} /> 小提醒：花茎交叉点要握紧，包装纸才会自然打开。</div>}<div className="tip-card"><Leaf size={17} /><div><b>花艺小贴士</b><p>包装纸的高度不要超过花头的 ⅔，才能露出轻盈的层次。</p></div></div></aside></div></section>;
 }
