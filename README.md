@@ -52,6 +52,8 @@ npm run dev
 4. 按 [AUTH_SETUP.md](AUTH_SETUP.md) 配置邮箱验证和网站 URL。
 5. 重启开发服务器。
 
+> 浏览器端只使用 Supabase 的公开 anon/publishable key，并依赖 Row Level Security 控制用户数据访问。不要提交 `.env.local`、SMTP 密码、`service_role` key 或 secret key。
+
 ## 部署到 Netlify
 
 仓库根目录的 [netlify.toml](netlify.toml) 已设置构建命令、静态发布目录和 Node.js 版本。将 GitHub 仓库连接到 Netlify 后，选择 `main` 分支；Base directory 留空。Netlify 会使用配置文件中的 `npm run build` 和 `dist/client`。
@@ -62,8 +64,6 @@ npm run dev
 - `VITE_SUPABASE_ANON_KEY`：Supabase 公开 anon/publishable key
 
 完成后重新部署。不要设置 Supabase `service_role` 或 secret key。
-
-> 浏览器端只使用 Supabase 的公开 anon/publishable key，并依赖 Row Level Security 控制用户数据访问。不要提交 `.env.local`、SMTP 密码、`service_role` key 或 secret key。
 
 ## 数据与隐私说明
 
