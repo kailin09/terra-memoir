@@ -1,0 +1,7 @@
+Made with Natural Earth.
+
+Derived from Natural Earth 1:10m Admin 0 – Countries v5.1.1 and Populated Places v5.1.2.
+Source and terms: https://www.naturalearthdata.com/downloads/10m-cultural-vectors/
+Natural Earth vector and raster data are public domain: https://www.naturalearthdata.com/about/terms-of-use/
+
+City points represent city or town locations at city-level scale. They are not street, venue, or building-level geocodes.

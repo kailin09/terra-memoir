@@ -36,3 +36,13 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+
+# Nested checkouts, generated bundles, and local tool metadata
+**/node_modules/
+**/.next/
+**/.vinext/
+**/.wrangler/
+**/.sites-runtime/
+**/.openai/
+/friendship-scrapbook/
+/site-bundle.tar.gz
