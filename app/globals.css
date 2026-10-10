@@ -768,3 +768,26 @@ body{background-color:var(--paper);background-image:radial-gradient(ellipse at 5
 .memory-entry,.account-card,.date-card,.ledger-form,.vault-group-ticket,.data-safety-panel{border-radius:14px;box-shadow:0 5px 18px #5147350b}.primary-button{border-radius:10px;background:linear-gradient(135deg,#829579,#687d66);box-shadow:inset 0 1px #ffffff55,0 3px 0 #596c56,0 7px 14px #596c5626}.primary-button:active{transform:translateY(2px);box-shadow:inset 0 2px 4px #3f4e3b55,0 1px 0 #596c56}
 @media(max-width:700px){.app-header{position:sticky;top:0;z-index:20}.globe-screen{width:93vw;padding-top:23px}.globe-heading{align-items:flex-start;padding:0 3px 8px}.globe-heading h1{font-size:clamp(28px,8vw,36px);margin:6px 0 7px}.globe-heading p{max-width:260px;font-size:11px;line-height:1.6}.atlas-passport-strip{max-width:100%;border-radius:13px;padding:8px 10px}.passport-stats{font-size:9px}.globe-screen .earth-stage{min-height:245px;border-radius:20px}.globe-screen .stage-note.note-top{font-size:9px;max-width:calc(100% - 76px)}.memory-highlights{gap:8px;margin:0 0 10px}.memory-highlight{min-height:124px;padding:10px;border-radius:12px}.memory-highlight strong{font-size:15px}.memory-highlight p{font-size:10px}.global-bottom-nav{border-radius:14px!important}}
 @media(prefers-reduced-motion:no-preference){.memory-highlight,.region-chip,.earth-zoom-controls button{transition:transform .2s ease,box-shadow .2s ease,background-color .2s ease}.memory-highlight:hover{transform:translateY(-3px)}.region-chip:hover{transform:translateY(-1px)}}
+/* 手机端底部导航：贴合屏幕底边并适配 iPhone 安全区域 */
+@media (max-width: 700px) {
+  .global-bottom-nav {
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+    height: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 6px 8px calc(env(safe-area-inset-bottom, 0px) + 6px) !important;
+    border-radius: 18px 18px 0 0 !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-bottom: 0 !important;
+    background: #fbf8f0 !important;
+    box-shadow: 0 -3px 18px #51473518 !important;
+    backdrop-filter: none !important;
+  }
+
+  .journey-app:not(.studio-mode) {
+    padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
